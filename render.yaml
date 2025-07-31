@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: bid-monitor
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    autoDeploy: false
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: DISPLAY
+        value: ":99"

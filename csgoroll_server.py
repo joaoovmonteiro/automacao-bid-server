@@ -11,10 +11,12 @@ import os
 import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from datetime import datetime
 import logging
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Configuração do logging
 logging.basicConfig(
@@ -27,21 +29,75 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Configuração do caminho do Tesseract OCR
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# Configuração do Tesseract para servidor (automática)
+# No servidor Linux, o tesseract geralmente está em /usr/bin/tesseract
+try:
+    # Tentar localização padrão do Linux
+    if os.path.exists('/usr/bin/tesseract'):
+        pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+    # Fallback para outras localizações
+    elif os.path.exists('/usr/local/bin/tesseract'):
+        pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
+    logger.info(f"Tesseract encontrado em: {pytesseract.pytesseract.tesseract_cmd}")
+except Exception as e:
+    logger.warning(f"Aviso na configuração do Tesseract: {e}")
 
 # Parâmetros da consulta BID
 UF = "SC"
 CODIGO_CLUBE = "20019"
-MAX_TENTATIVAS = 5000000000  # Reduzido para evitar loops infinitos
+MAX_TENTATIVAS = 5000000000
 
 # Credenciais do X (Twitter)
 TWITTER_USERNAME = "biddocriciuma"
 TWITTER_PASSWORD = "C@mpinh02134"
 
+def criar_driver_chrome():
+    """Cria driver do Chrome otimizado para servidor"""
+    chrome_options = Options()
+    
+    # Opções essenciais para servidor
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--disable-background-timer-throttling")
+    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+    chrome_options.add_argument("--disable-renderer-backgrounding")
+    chrome_options.add_argument("--disable-features=TranslateUI")
+    chrome_options.add_argument("--disable-ipc-flooding-protection")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--disable-logging")
+    chrome_options.add_argument("--log-level=3")
+    
+    # Configurações para reduzir uso de memória
+    chrome_options.add_argument("--memory-pressure-off")
+    chrome_options.add_argument("--max_old_space_size=4096")
+    
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option('useAutomationExtension', False)
+    
+    try:
+        # Usar WebDriverManager para gerenciar ChromeDriver automaticamente
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        return driver
+    except Exception as e:
+        logger.error(f"Erro ao criar driver Chrome: {e}")
+        # Fallback: tentar sem WebDriverManager
+        try:
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            return driver
+        except Exception as e2:
+            logger.error(f"Erro no fallback do Chrome: {e2}")
+            raise
+
 def limpar_nome_arquivo(nome):
     """Remove caracteres inválidos para nomes de arquivo"""
-    # Remove caracteres especiais e substitui por underscore
     nome_limpo = re.sub(r'[<>:"/\\|?*]', '_', nome)
     nome_limpo = nome_limpo.replace(' ', '_')
     return nome_limpo
@@ -164,6 +220,7 @@ def imagem_para_base64(caminho_imagem):
 
 def criar_card_atleta(atleta_data, foto_path):
     """Cria um card visual do atleta"""
+    driver = None
     try:
         foto_src = ""
         if foto_path and os.path.exists(foto_path):
@@ -247,55 +304,35 @@ def criar_card_atleta(atleta_data, foto_path):
         </html>
         """
         
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--window-size=900,700")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--force-device-scale-factor=1")
-        chrome_options.add_argument("--disable-logging")
-        chrome_options.add_argument("--log-level=3")
+        driver = criar_driver_chrome()
+        driver.set_window_size(900, 700)
+        driver.execute_script("document.open(); document.write(arguments[0]); document.close();", html_content)
+        time.sleep(3)
         
-        driver = webdriver.Chrome(options=chrome_options)
-        try:
-            driver.set_window_size(900, 700)
-            driver.execute_script("document.open(); document.write(arguments[0]); document.close();", html_content)
-            time.sleep(3)
-            
-            nome_limpo = limpar_nome_arquivo(atleta_data['nome'])
-            nome_arquivo = f"{atleta_data['codigo_atleta']}_{nome_limpo}_card.png"
-            caminho_card = os.path.join("cards_atletas", nome_arquivo)
-            
-            element = driver.find_element(By.CSS_SELECTOR, ".container")
-            element.screenshot(caminho_card)
-            logger.info(f"Card criado: {caminho_card}")
-            return caminho_card
-        except Exception as e:
-            logger.error(f"Erro ao criar card: {e}")
-            return None
-        finally:
-            driver.quit()
+        nome_limpo = limpar_nome_arquivo(atleta_data['nome'])
+        nome_arquivo = f"{atleta_data['codigo_atleta']}_{nome_limpo}_card.png"
+        caminho_card = os.path.join("cards_atletas", nome_arquivo)
+        
+        element = driver.find_element(By.CSS_SELECTOR, ".container")
+        element.screenshot(caminho_card)
+        logger.info(f"Card criado: {caminho_card}")
+        return caminho_card
+        
     except Exception as e:
-        logger.error(f"Erro geral ao criar card: {e}")
+        logger.error(f"Erro ao criar card: {e}")
         return None
+    finally:
+        if driver:
+            try:
+                driver.quit()
+            except:
+                pass
 
 def postar_no_x(atleta_data, card_path):
     """Posta o atleta no X (Twitter)"""
     driver = None
     try:
-        chrome_options = Options()
-        chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--window-size=1920,1080")
-        chrome_options.add_argument("--disable-notifications")
-        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        chrome_options.add_argument("--disable-logging")
-        chrome_options.add_argument("--log-level=3")
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        chrome_options.add_experimental_option('useAutomationExtension', False)
-
-        driver = webdriver.Chrome(options=chrome_options)
-        driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        driver = criar_driver_chrome()
         
         # Formatação da data de publicação
         data_publicacao = atleta_data['data_publicacao']

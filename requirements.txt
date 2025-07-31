@@ -1,8 +1,9 @@
-requests
-beautifulsoup4
-pillow
-pytesseract
-opencv-python
-numpy
-selenium
-schedule
+requests==2.31.0
+beautifulsoup4==4.12.2
+pillow==10.0.0
+pytesseract==0.3.10
+opencv-python-headless==4.8.0.76
+numpy==1.24.3
+selenium==4.15.0
+schedule==1.2.0
+webdriver-manager==4.0.1
