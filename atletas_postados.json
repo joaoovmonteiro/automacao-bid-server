@@ -1,0 +1,66 @@
+{
+  "b6cb32392edd75b73cd6c06c6fcde765": {
+    "nome": "Altemir Cordeiro Pessôa Neto",
+    "codigo_atleta": "383352",
+    "contrato_numero": "2502069SC",
+    "data_publicacao": "2025-06-10 15:03:39.340",
+    "data_postagem": "2025-07-30T00:16:19.835811",
+    "hash": "b6cb32392edd75b73cd6c06c6fcde765"
+  },
+  "bf5332b4285e23bcda95723c667916f2": {
+    "nome": "Gustavo Maia da Silva",
+    "codigo_atleta": "523730",
+    "contrato_numero": "2607874SC",
+    "data_publicacao": "2025-06-10 18:08:47.870",
+    "data_postagem": "2025-07-30T00:17:28.940101",
+    "hash": "bf5332b4285e23bcda95723c667916f2"
+  },
+  "a6cc6c47a85fadfb7fb7f99732508e59": {
+    "nome": "Hudson Alexandre Batista da Silva",
+    "codigo_atleta": "544845",
+    "contrato_numero": "2521430SC",
+    "data_publicacao": "2025-06-10 17:19:38.717",
+    "data_postagem": "2025-07-30T00:18:39.805946",
+    "hash": "a6cc6c47a85fadfb7fb7f99732508e59"
+  },
+  "75fc330e03b5acc74bbb1935515ce2ac": {
+    "nome": "Jean Carlos Vicente",
+    "codigo_atleta": "292976",
+    "contrato_numero": "2607636SC",
+    "data_publicacao": "2025-06-10 17:57:00.290",
+    "data_postagem": "2025-07-30T00:19:51.614247",
+    "hash": "75fc330e03b5acc74bbb1935515ce2ac"
+  },
+  "d6904d271f520743aa999cea84a49882": {
+    "nome": "Matheus Sinhorelli da Rosa",
+    "codigo_atleta": "725328",
+    "contrato_numero": "2607653SC",
+    "data_publicacao": "2025-06-10 18:09:01.510",
+    "data_postagem": "2025-07-30T00:20:59.652806",
+    "hash": "d6904d271f520743aa999cea84a49882"
+  },
+  "f2f9a2efe4b438a6a3a7567c2ea8b56e": {
+    "nome": "Caio Kauan Santos Ferreira",
+    "codigo_atleta": "777919",
+    "contrato_numero": "2625809SC",
+    "data_publicacao": "2025-07-29 18:21:09.620",
+    "data_postagem": "2025-07-30T00:22:21.328828",
+    "hash": "f2f9a2efe4b438a6a3a7567c2ea8b56e"
+  },
+  "c4c511d5464f347df0be2da83722bcc3": {
+    "nome": "Carlos Eduardo Rodolfo Justino",
+    "codigo_atleta": "731705",
+    "contrato_numero": "2625072SC",
+    "data_publicacao": "2025-07-30 15:59:02.700",
+    "data_postagem": "2025-07-30T16:29:29.256114",
+    "hash": "c4c511d5464f347df0be2da83722bcc3"
+  },
+  "292afc821dab8986829a30be3a366e24": {
+    "nome": "Rafael Val de Melo",
+    "codigo_atleta": "713897",
+    "contrato_numero": "2633777SC",
+    "data_publicacao": "2025-07-31 17:09:38.100",
+    "data_postagem": "2025-07-31T17:40:12.212127",
+    "hash": "292afc821dab8986829a30be3a366e24"
+  }
+}
